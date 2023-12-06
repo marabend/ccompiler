@@ -1,6 +1,2 @@
-union
-makefile
-int
-unsigned
-long
-234
+0xAB75
+0b1110011
