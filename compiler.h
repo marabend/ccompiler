@@ -160,6 +160,20 @@ struct scope
     struct scope* parent;
 };
 
+enum
+{
+    SYMBOL_TYPE_NODE,
+    SYMBOL_TYPE_NATIVE_FUNCTION,
+    SYMBOL_TYPE_UNKNOWN
+};
+
+struct symbol
+{
+    const char* name;
+    int type;
+    void* data;
+};
+
 
 struct compile_process
 {
@@ -185,6 +199,15 @@ struct compile_process
         struct scope* root;
         struct scope* current;
     } scope;
+
+    struct 
+    {
+        // Current active symbol tale -> struct symbol*
+        struct vector* table;
+
+        // struct vector* multiple symbol tables stored in here.
+        struct vector* tables;
+    }symbols;
 };
 
 enum
@@ -232,6 +255,31 @@ enum
     NODE_FLAG_INSIDE_EXPRESSION = 0b00000001
 };
 
+struct node;
+
+struct datatype
+{
+    int flags;
+    // i.e type of long, int, float etc...
+    int type;
+
+    // handling of : long long a or long int b
+    struct datatype* secondary;
+
+    // long
+    const char* type_str;
+
+    // the sizeof the datatype.
+    size_t size;
+    // int*** a;
+    int pointer_depth;
+    union
+    {
+        struct node* struct_node; 
+        struct node* union_node;
+    };
+};
+
 struct node
 {
     int type;
@@ -255,6 +303,13 @@ struct node
             struct node* right;
             const char* op;
         } exp;
+
+        struct var
+        {
+            struct datatype type;
+            const char* name;
+            struct node* val;
+        }var;
     };
 
     union 
@@ -295,29 +350,6 @@ enum
     DATA_TYPE_STRUCT,
     DATA_TYPE_UNION,
     DATA_TYPE_UNKNOWN
-};
-
-struct datatype
-{
-    int flags;
-    // i.e type of long, int, float etc...
-    int type;
-
-    // handling of : long long a or long int b
-    struct datatype* secondary;
-
-    // long
-    const char* type_str;
-
-    // the sizeof the datatype.
-    size_t size;
-    // int*** a;
-    int pointer_depth;
-    union
-    {
-        struct node* struct_node; 
-        struct node* union_node;
-    };
 };
 
 enum
