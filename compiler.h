@@ -309,7 +309,13 @@ struct node
             struct datatype type;
             const char* name;
             struct node* val;
-        }var;
+        } var;
+
+        struct varlist
+        {
+            // A list of struct node* variables
+            struct vector* list;
+        } var_list;
     };
 
     union 

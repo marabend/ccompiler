@@ -49,6 +49,15 @@ static struct token* token_next()
     return vector_peek(current_process->token_vec);
 }
 
+static void expect_sym(char c)
+{
+    struct token* next_token = token_next();
+    if(!next_token || next_token->type != TOKEN_TYPE_SYMBOL || next_token->cval != c)
+    {
+        compiler_error(current_process, "Expecting symbol %c however somethings else was provided\n", c);
+    }
+}
+
 static struct token* token_peek_next()
 {
     struct token* next_token = vector_peek_no_increment(current_process->token_vec);
@@ -512,6 +521,11 @@ void make_variable_node(struct datatype* dtype, struct token* name_token, struct
     node_create(&(struct node){.type=NODE_TYPE_VARIABLE, .var.name=name_str, .var.type=*dtype, .var.val=value_node});
 }
 
+void make_variable_list_node(struct vector* var_list_vec)
+{
+    node_create(&(struct node){.type=NODE_TYPE_VARIABLE_LIST, .var_list.list=var_list_vec});
+}
+
 void make_variable_node_and_register(struct history* history, struct datatype* dtype, struct token* name_token, struct node* value_node)
 {
     make_variable_node(dtype, name_token, value_node);
@@ -564,6 +578,27 @@ void parse_variable_function_or_struct_union(struct history* history)
     // int abc()
     // Check if this is a function
     parse_variable(&dtype, name_token, history);
+
+    if(token_is_operator(token_peek_next(), ","))
+    {
+        struct vector* var_list = vector_create(sizeof(struct node*));
+        // Pop off the original variable
+        struct node* var_node = node_pop();
+        vector_push(var_list, &var_node);
+        while(token_is_operator(token_peek_next(), ","))
+        {
+            // Get rid of the comma
+            token_next();
+            name_token = token_next();
+            parse_variable(&dtype, name_token, history);
+            var_node = node_pop();
+            vector_push(var_list, &var_node);
+        }
+
+        make_variable_list_node(var_list);
+    }
+
+    expect_sym(';');
 
 }
 
