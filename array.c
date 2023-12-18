@@ -6,7 +6,6 @@ struct array_brackets* array_brackets_new()
 {
     struct array_brackets* brackets = calloc(1, sizeof(struct array_brackets));
     brackets->n_brackets = vector_create(sizeof(struct node*));
-
     return brackets;
 }
 
@@ -30,8 +29,7 @@ size_t array_brackets_calculate_size_from_index(struct datatype* dtype, struct a
 {
     struct vector* array_vec = array_brackets_node_vector(brackets);
     size_t size = dtype->size;
-
-    if(index >= vector_count(array_vec))
+    if (index >= vector_count(array_vec))
     {
         // char* abc;
         // return abc[0]; return abc[1];
@@ -40,8 +38,7 @@ size_t array_brackets_calculate_size_from_index(struct datatype* dtype, struct a
 
     vector_set_peek_pointer(array_vec, index);
     struct node* array_bracket_node = vector_peek_ptr(array_vec);
-
-    if(!array_bracket_node)
+    if (!array_bracket_node)
     {
         return 0;
     }
@@ -49,7 +46,6 @@ size_t array_brackets_calculate_size_from_index(struct datatype* dtype, struct a
     while(array_bracket_node)
     {
         assert(array_bracket_node->bracket.inner->type == NODE_TYPE_NUMBER);
-        array_bracket_node = vector_peek_ptr(array_vec);
         int number = array_bracket_node->bracket.inner->llnum;
         size *= number;
         array_bracket_node = vector_peek_ptr(array_vec);

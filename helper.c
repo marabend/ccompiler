@@ -1,7 +1,6 @@
 #include "compiler.h"
 #include "helpers/vector.h"
 #include <assert.h>
-
 size_t variable_size(struct node* var_node)
 {
     assert(var_node->type == NODE_TYPE_VARIABLE);
@@ -14,7 +13,6 @@ size_t variable_size_for_list(struct node* var_list_node)
     size_t size = 0;
     vector_set_peek_pointer(var_list_node->var_list.list, 0);
     struct node* var_node = vector_peek_ptr(var_list_node->var_list.list);
-
     while(var_node)
     {
         size += variable_size(var_node);
@@ -24,32 +22,34 @@ size_t variable_size_for_list(struct node* var_list_node)
     return size;
 }
 
-struct node* vararible_struct_or_union_body_node(struct node* node)
+struct node* variable_struct_or_union_body_node(struct node* node)
 {
-    if(!node_is_struct_or_union_variable(node))
+    if (!node_is_struct_or_union_variable(node))
     {
         return NULL;
     }
 
-    if(node->var.type.type == DATA_TYPE_STRUCT)
+    if (node->var.type.type == DATA_TYPE_STRUCT)
     {
         return node->var.type.struct_node->_struct.body_n;
     }
 
     // return the union body.
-    #warning "Remember to implement unions
-    printf("No Union nodes are yet implemented\n");
-    exit(1);
+    if (node->var.type.type == DATA_TYPE_UNION)
+    {
+        return node->var.type.union_node->_union.body_n;
+    }
+    return NULL;
 }
 
 int padding(int val, int to)
 {
-    if(to <= 0)
+    if (to <= 0)
     {
         return 0;
     }
 
-    if((val % to) == 0)
+    if ((val % to) == 0)
     {
         return 0;
     }
@@ -59,22 +59,20 @@ int padding(int val, int to)
 
 int align_value(int val, int to)
 {
-    if(val % to)
+    if (val % to)
     {
         val += padding(val, to);
     }
-
     return val;
 }
 
 int align_value_treat_positive(int val, int to)
 {
     assert(to >= 0);
-    if(val < 0)
+    if (val < 0)
     {
-        to =- to;
+        to = -to;
     }
-
     return align_value(val, to);
 }
 
@@ -86,10 +84,9 @@ int compute_sum_padding(struct vector* vec)
     vector_set_peek_pointer(vec, 0);
     struct node* cur_node = vector_peek_ptr(vec);
     struct node* last_node = NULL;
-
     while(cur_node)
     {
-        if(cur_node->type != NODE_TYPE_VARIABLE)
+        if (cur_node->type != NODE_TYPE_VARIABLE)
         {
             cur_node = vector_peek_ptr(vec);
             continue;
@@ -102,4 +99,5 @@ int compute_sum_padding(struct vector* vec)
     }
 
     return padding;
+
 }

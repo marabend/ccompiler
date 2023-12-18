@@ -1,2 +1,2 @@
-# ccompiler
-A compiler for the c programming language
+# PeachCompiler
+A C compiler created for the how to create a C Compiler online course
